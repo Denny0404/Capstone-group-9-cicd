@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Serverless TODO</title>
 
-  <!-- Inline CSS (single-file changes for PRs) -->
+  <!-- Inline CSS (single-file change for PR) -->
   <style>
     :root {
       --bg: #0b1020;
@@ -13,8 +13,6 @@
       --text: #e8ebf5;
       --muted: #2a3464;
       --btn: #4f6cff;
-      --danger: #ff4d4d;
-      --danger-hover: #cc0000;
     }
     /* Light theme variables */
     .theme-light {
@@ -23,8 +21,6 @@
       --text: #202437;
       --muted: #d9def2;
       --btn: #3a57e8;
-      --danger: #ff5a5a;
-      --danger-hover: #d10000;
     }
 
     * { box-sizing: border-box; }
@@ -43,15 +39,6 @@
     footer { margin-top: 20px; opacity:.85; font-size: 14px; }
     .note { margin: 6px 0 0; }
     .righty { margin-left: auto; }
-
-    /* Clear All button */
-    .btn-clear-all {
-      background: var(--danger);
-    }
-    .btn-clear-all:hover {
-      background: var(--danger-hover);
-    }
-
     /* Toast snackbar */
     .toast {
       position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
@@ -60,7 +47,6 @@
       opacity: 0; pointer-events: none; transition: opacity .18s ease;
     }
     .toast.show { opacity: 1; }
-
     @media (max-width: 520px) {
       .container { margin: 20px 12px; padding: 18px; }
       button, input { font-size: 15px; }
@@ -82,9 +68,6 @@
       <button id="filter-done">Done</button>
       <button id="mark-all">Mark All Done</button>
 
-      <!-- New: Clear All (deletes every item) -->
-      <button id="clear-all" class="btn-clear-all" title="Delete all todos">Clear All</button>
-
       <!-- New: theme toggle -->
       <button id="theme-toggle" class="righty" title="Toggle light/dark">Light Theme</button>
     </div>
@@ -93,7 +76,7 @@
 
     <footer>
       <span id="stats"></span>
-      <p class="note">Demo app: Lambda + API Gateway + DynamoDB + S3(+CloudFront) + Terraform + GitHub Actions</p>
+      <p class="note">Demo app: Lambda + API Gateway + DynamoDB + S3 + Terraform + GitHub Actions</p>
     </footer>
   </div>
 
@@ -103,9 +86,9 @@
   <!-- Your existing app logic -->
   <script src="app.js"></script>
 
-  <!-- Tiny inline script for theme, toasts, and Clear All (keeping this a one-file change) -->
+  <!-- Tiny inline script for theme + toasts (so we keep this a one-file change) -->
   <script>
-    // Toast helper
+    // Toast helper (used now; can be reused by future features)
     function toast(msg) {
       const t = document.getElementById("toast");
       t.textContent = msg;
@@ -127,34 +110,6 @@
         localStorage.setItem("theme", light ? "light" : "dark");
         btn.textContent = light ? "Dark Theme" : "Light Theme";
         toast(`Switched to ${light ? "light" : "dark"} theme`);
-      });
-    })();
-
-    // Clear All: simulate clicks on each Delete button so app.js handles API + state
-    (function () {
-      const btn = document.getElementById("clear-all");
-      const list = document.getElementById("todo-list");
-
-      async function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
-
-      btn.addEventListener("click", async function (e) {
-        e.preventDefault();
-        const deletes = list.querySelectorAll('button[data-action="delete"]');
-        if (!deletes.length) {
-          toast("Nothing to clear");
-          return;
-        }
-        if (!confirm(`Delete ALL ${deletes.length} items? This cannot be undone.`)) return;
-
-        // Click each delete button; app.js will call the API and update the list
-        let count = 0;
-        for (const delBtn of Array.from(deletes)) {
-          delBtn.click();
-          count++;
-          // small delay so requests don't all fire at once
-          await sleep(120);
-        }
-        toast(`Cleared ${count} item${count > 1 ? "s" : ""}`);
       });
     })();
   </script>
