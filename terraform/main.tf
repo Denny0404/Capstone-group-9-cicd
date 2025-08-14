@@ -6,9 +6,9 @@ resource "random_id" "suffix" {
   byte_length = 4
 }
 
-# ---------- DynamoDB ----------
+# ---------- DynamoDB (with unique suffix) ----------
 resource "aws_dynamodb_table" "todos" {
-  name         = "${var.project_name}-todos"
+  name         = "${var.project_name}-todos-${random_id.suffix.hex}"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "id"
 
@@ -21,10 +21,12 @@ resource "aws_dynamodb_table" "todos" {
     enabled = true
   }
 
-  tags = { Project = var.project_name }
+  tags = {
+    Project = var.project_name
+  }
 }
 
-# ---------- Lambda Role + Policy ----------
+# ---------- Lambda Role + Policy (with unique suffix) ----------
 data "aws_iam_policy_document" "lambda_assume" {
   statement {
     actions = ["sts:AssumeRole"]
@@ -36,7 +38,7 @@ data "aws_iam_policy_document" "lambda_assume" {
 }
 
 resource "aws_iam_role" "lambda_role" {
-  name               = "${var.project_name}-lambda-role"
+  name               = "${var.project_name}-lambda-role-${random_id.suffix.hex}"
   assume_role_policy = data.aws_iam_policy_document.lambda_assume.json
 }
 
@@ -63,7 +65,7 @@ data "aws_iam_policy_document" "lambda_policy" {
 }
 
 resource "aws_iam_policy" "lambda_policy" {
-  name   = "${var.project_name}-lambda-policy"
+  name   = "${var.project_name}-lambda-policy-${random_id.suffix.hex}"
   policy = data.aws_iam_policy_document.lambda_policy.json
 }
 
@@ -80,7 +82,7 @@ data "archive_file" "lambda_zip" {
 }
 
 resource "aws_lambda_function" "api" {
-  function_name    = "${var.project_name}-api"
+  function_name    = "${var.project_name}-api-${random_id.suffix.hex}"
   role             = aws_iam_role.lambda_role.arn
   handler          = "index.handler"
   runtime          = "nodejs18.x"
@@ -96,7 +98,7 @@ resource "aws_lambda_function" "api" {
 
 # ---------- API Gateway (HTTP API) ----------
 resource "aws_apigatewayv2_api" "http_api" {
-  name          = "${var.project_name}-http-api"
+  name          = "${var.project_name}-http-api-${random_id.suffix.hex}"
   protocol_type = "HTTP"
 
   cors_configuration {
@@ -155,9 +157,13 @@ resource "aws_lambda_permission" "allow_apigw" {
 resource "aws_s3_bucket" "frontend" {
   bucket        = "${var.project_name}-fe-${random_id.suffix.hex}"
   force_destroy = true
-  tags          = { Project = var.project_name }
+
+  tags = {
+    Project = var.project_name
+  }
 }
 
+# Allow public ACLs/policies at bucket level (account-level block may still override)
 resource "aws_s3_bucket_public_access_block" "frontend" {
   bucket                  = aws_s3_bucket.frontend.id
   block_public_acls       = false
@@ -166,6 +172,7 @@ resource "aws_s3_bucket_public_access_block" "frontend" {
   restrict_public_buckets = false
 }
 
+# Public read policy for website hosting (requires account not to block public bucket policies)
 data "aws_iam_policy_document" "public_read" {
   statement {
     actions   = ["s3:GetObject"]
@@ -184,9 +191,11 @@ resource "aws_s3_bucket_policy" "frontend" {
 
 resource "aws_s3_bucket_website_configuration" "frontend" {
   bucket = aws_s3_bucket.frontend.id
+
   index_document {
     suffix = "index.html"
   }
+
   error_document {
     key = "index.html"
   }
@@ -194,7 +203,7 @@ resource "aws_s3_bucket_website_configuration" "frontend" {
 
 # ---------- CloudWatch Alarms ----------
 resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
-  alarm_name          = "${var.project_name}-lambda-errors"
+  alarm_name          = "${var.project_name}-lambda-errors-${random_id.suffix.hex}"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 1
   metric_name         = "Errors"
@@ -209,7 +218,7 @@ resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "api_5xx" {
-  alarm_name          = "${var.project_name}-api-5xx"
+  alarm_name          = "${var.project_name}-api-5xx-${random_id.suffix.hex}"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 1
   metric_name         = "5xx"
