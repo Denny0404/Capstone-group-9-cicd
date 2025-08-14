@@ -1,6 +1,13 @@
 <<<<<<< HEAD
 # Capstone: Serverless TODO (CI/CD + IaC)
 
+The project demonstrates:
+**Frontend** hosting with AWS S3 (Static Website Hosting)
+**Backend** API with AWS Lambda + API Gateway
+**Data storage** with AWS DynamoDB
+**Infrastructure provisioning** with Terraform
+**Continuous Integration & Deployment (CI/CD) using** GitHub Actions
+
 A tiny full‑stack app you can demo *today*:
 
 - **Frontend:** Static HTML/CSS/JS hosted on **S3 (website hosting)**
