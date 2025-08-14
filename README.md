@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Capstone: Serverless TODO (CI/CD + IaC)
 
 A tiny full‑stack app you can demo *today*:
@@ -97,3 +98,6 @@ From your local machine or a runner:
 cd terraform
 terraform destroy -auto-approve
 ```
+=======
+# Capstone-group-9-cicd
+>>>>>>> a713425475fa27e4c725c22a91b90a86760013cb
