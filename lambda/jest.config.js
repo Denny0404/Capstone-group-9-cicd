@@ -1,8 +1,6 @@
-
 export default {
   testEnvironment: "node",
-  transform: {},                    // no Babel; run JS as-is
-  extensionsToTreatAsEsm: [".js"],  // tell Jest these are ESM
+  transform: {},               // Don't transform files, run JS as-is
   collectCoverage: true,
   collectCoverageFrom: ["index.js"],
 };
