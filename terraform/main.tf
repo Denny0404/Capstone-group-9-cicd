@@ -6,7 +6,7 @@ resource "random_id" "suffix" {
   byte_length = 4
 }
 
-# ---------- DynamoDB (with unique suffix) ----------
+# DynamoDB (with unique suffix) 
 resource "aws_dynamodb_table" "todos" {
   name         = "${var.project_name}-todos-${random_id.suffix.hex}"
   billing_mode = "PAY_PER_REQUEST"
