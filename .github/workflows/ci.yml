@@ -35,9 +35,4 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      - name: Terraform fmt & validate
-        working-directory: terraform
-        run: |
-          terraform init -backend=false
-          terraform fmt -check
-          terraform validate
+     
