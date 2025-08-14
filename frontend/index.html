@@ -4,11 +4,59 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Serverless TODO</title>
-  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Inline CSS (single-file change for PR) -->
+  <style>
+    :root {
+      --bg: #0b1020;
+      --card: #131a33;
+      --text: #e8ebf5;
+      --muted: #2a3464;
+      --btn: #4f6cff;
+    }
+    /* Light theme variables */
+    .theme-light {
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --text: #202437;
+      --muted: #d9def2;
+      --btn: #3a57e8;
+    }
+
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin:0; padding:0; background: var(--bg); color: var(--text); }
+    .container { max-width: 640px; margin: 40px auto; background: var(--card); padding: 24px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,.35); border: 1px solid var(--muted); }
+    h1 { margin-top: 0; }
+    form { display:flex; gap:8px; }
+    input { flex:1; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--muted); background: var(--bg); color: var(--text); }
+    button { padding:10px 14px; border:0; border-radius:8px; background: var(--btn); color:white; cursor:pointer; }
+    button:hover { filter: brightness(1.08); }
+    .controls { margin: 16px 0; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    ul { list-style:none; padding:0; margin:0; }
+    li { display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border:1px solid var(--muted); border-radius:8px; margin-bottom:8px; background: var(--bg); }
+    li.done { opacity:.75; text-decoration: line-through; }
+    .todo-actions { display:flex; gap:8px; }
+    footer { margin-top: 20px; opacity:.85; font-size: 14px; }
+    .note { margin: 6px 0 0; }
+    .righty { margin-left: auto; }
+    /* Toast snackbar */
+    .toast {
+      position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
+      background: var(--card); color: var(--text); border: 1px solid var(--muted);
+      padding: 10px 14px; border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,.25);
+      opacity: 0; pointer-events: none; transition: opacity .18s ease;
+    }
+    .toast.show { opacity: 1; }
+    @media (max-width: 520px) {
+      .container { margin: 20px 12px; padding: 18px; }
+      button, input { font-size: 15px; }
+    }
+  </style>
 </head>
 <body>
   <div class="container">
     <h1>Serverless TODO</h1>
+
     <form id="todo-form">
       <input id="title" placeholder="What needs doing?" required />
       <button type="submit">Add</button>
@@ -19,6 +67,9 @@
       <button id="filter-open">Open</button>
       <button id="filter-done">Done</button>
       <button id="mark-all">Mark All Done</button>
+
+      <!-- New: theme toggle -->
+      <button id="theme-toggle" class="righty" title="Toggle light/dark">Light Theme</button>
     </div>
 
     <ul id="todo-list"></ul>
@@ -28,6 +79,39 @@
       <p class="note">Demo app: Lambda + API Gateway + DynamoDB + S3 + Terraform + GitHub Actions</p>
     </footer>
   </div>
+
+  <!-- Toast container -->
+  <div id="toast" class="toast" aria-live="polite"></div>
+
+  <!-- Your existing app logic -->
   <script src="app.js"></script>
+
+  <!-- Tiny inline script for theme + toasts (so we keep this a one-file change) -->
+  <script>
+    // Toast helper (used now; can be reused by future features)
+    function toast(msg) {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      setTimeout(() => t.classList.remove("show"), 1400);
+    }
+
+    // Theme init & toggle (persists choice)
+    (function () {
+      const btn = document.getElementById("theme-toggle");
+      const saved = localStorage.getItem("theme") || "dark";
+      document.body.classList.toggle("theme-light", saved === "light");
+      btn.textContent = saved === "light" ? "Dark Theme" : "Light Theme";
+
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        const light = !document.body.classList.contains("theme-light");
+        document.body.classList.toggle("theme-light", light);
+        localStorage.setItem("theme", light ? "light" : "dark");
+        btn.textContent = light ? "Dark Theme" : "Light Theme";
+        toast(`Switched to ${light ? "light" : "dark"} theme`);
+      });
+    })();
+  </script>
 </body>
 </html>
