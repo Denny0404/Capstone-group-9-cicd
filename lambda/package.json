@@ -1,0 +1,17 @@
+{
+  "name": "serverless-todo-lambda",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Lambda backend for Serverless TODO",
+  "main": "index.js",
+  "scripts": {
+    "test": "node --version && jest --coverage --runInBand"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.637.0",
+    "@aws-sdk/lib-dynamodb": "^3.637.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}

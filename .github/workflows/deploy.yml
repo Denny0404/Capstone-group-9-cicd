@@ -1,0 +1,64 @@
+name: Deploy (main)
+
+on:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install & Test (Lambda)
+        working-directory: lambda
+        run: |
+          npm ci
+          npm test -- --coverage
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Configure AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Terraform Apply
+        working-directory: terraform
+        env:
+          TF_VAR_aws_region: ${{ secrets.AWS_REGION }}
+        run: |
+          terraform init
+          terraform apply -auto-approve
+          terraform output -json > ../tf-outputs.json
+
+      - name: Inject API URL into frontend
+        run: |
+          API_URL=$(jq -r '.api_url.value' tf-outputs.json)
+          echo "API_URL=$API_URL"
+          mkdir -p dist
+          cp -r frontend/* dist/
+          sed -i "s#__API_URL__#${API_URL}#g" dist/app.js
+
+      - name: Upload frontend to S3 (website)
+        run: |
+          BUCKET=$(jq -r '.frontend_bucket.value' tf-outputs.json)
+          aws s3 sync dist/ s3://$BUCKET/ --delete
+
+      - name: Print Website URL
+        run: |
+          WEBSITE=$(jq -r '.website_url.value' tf-outputs.json)
+          echo "Website URL: $WEBSITE" >> $GITHUB_STEP_SUMMARY
+          echo "Open: $WEBSITE"

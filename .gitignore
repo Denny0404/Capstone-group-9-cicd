@@ -1,0 +1,15 @@
+# Node
+lambda/node_modules
+lambda/coverage
+
+# Terraform
+.terraform/
+terraform/.terraform*
+terraform/terraform.tfstate*
+terraform/build/
+
+# Local
+dist/
+tf-outputs.json
+*.zip
+.DS_Store

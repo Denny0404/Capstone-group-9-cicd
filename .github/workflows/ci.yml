@@ -1,0 +1,43 @@
+name: CI (PR & feature branches)
+
+on:
+  pull_request:
+  push:
+    branches:
+      - "feature/**"
+      - "dev"
+
+jobs:
+  test-and-validate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install & Test (Lambda)
+        working-directory: lambda
+        run: |
+          npm ci
+          npm test -- --coverage
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-html
+          path: lambda/coverage/
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform fmt & validate
+        working-directory: terraform
+        run: |
+          terraform init -backend=false
+          terraform fmt -check
+          terraform validate

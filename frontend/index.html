@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Serverless TODO</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Serverless TODO</h1>
+    <form id="todo-form">
+      <input id="title" placeholder="What needs doing?" required />
+      <button type="submit">Add</button>
+    </form>
+
+    <div class="controls">
+      <button id="filter-all">All</button>
+      <button id="filter-open">Open</button>
+      <button id="filter-done">Done</button>
+      <button id="mark-all">Mark All Done</button>
+    </div>
+
+    <ul id="todo-list"></ul>
+
+    <footer>
+      <span id="stats"></span>
+      <p class="note">Demo app: Lambda + API Gateway + DynamoDB + S3 + Terraform + GitHub Actions</p>
+    </footer>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
