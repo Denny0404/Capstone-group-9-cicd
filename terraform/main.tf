@@ -155,7 +155,7 @@ resource "aws_lambda_permission" "allow_apigw" {
 resource "aws_s3_bucket" "frontend" {
   bucket        = "${var.project_name}-fe-${random_id.suffix.hex}"
   force_destroy = true
-  tags = { Project = var.project_name }
+  tags          = { Project = var.project_name }
 }
 
 resource "aws_s3_bucket_public_access_block" "frontend" {
